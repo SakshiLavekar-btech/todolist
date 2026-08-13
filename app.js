@@ -1,15 +1,18 @@
 // ==========================================================
 // Ledger — app.js
-// Direct access version — NO LOGIN / NO SIGNUP
+// Direct Access Version
+// No Login / No Signup / No Logout
 // ==========================================================
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
-// ----------------------------------------------------------
-// Supabase
-// ----------------------------------------------------------
 
-const SUPABASE_URL = 'https://wumktcntbmktevoizxxo.supabase.co';
+// ==========================================================
+// Supabase
+// ==========================================================
+
+const SUPABASE_URL =
+  'https://wumktcntbmktevoizxxo.supabase.co';
 
 const SUPABASE_ANON_KEY =
   'sb_publishable_-Pb9cApuUuky_Elc-MOZAQ_inEnch7B';
@@ -39,8 +42,6 @@ let searchQuery = '';
 // DOM references
 // ==========================================================
 
-// Authentication elements are NO LONGER USED.
-
 const appShell = document.getElementById('app-shell');
 
 const taskForm = document.getElementById('task-form');
@@ -51,6 +52,7 @@ const taskEditIdInput = document.getElementById('task-edit-id');
 
 const taskListEl = document.getElementById('task-list');
 const emptyState = document.getElementById('empty-state');
+
 const searchInput = document.getElementById('search-input');
 
 const listTitle = document.getElementById('list-title');
@@ -77,149 +79,186 @@ const toastEl =
 
 
 // ==========================================================
-// Direct App Access
+// Make sure app is visible
 // ==========================================================
 
-async function init() {
-
-  // Directly show application.
-  // No login/signup required.
-
-  if (appShell) {
-    appShell.classList.remove('hidden');
-  }
-
-  await loadTasks();
+if (appShell) {
+  appShell.classList.remove('hidden');
 }
 
 
 // ==========================================================
-// Task CRUD
+// Load tasks
 // ==========================================================
 
 async function loadTasks() {
 
-  const { data, error } = await supabase
-    .from('tasks')
-    .select('*')
-    .order('completed', { ascending: true })
-    .order('due_date', {
-      ascending: true,
-      nullsFirst: false
-    })
-    .order('created_at', {
-      ascending: false
-    });
+  try {
 
-  if (error) {
+    const { data, error } = await supabase
+      .from('tasks')
+      .select('*')
+      .order('completed', {
+        ascending: true
+      })
+      .order('due_date', {
+        ascending: true,
+        nullsFirst: false
+      })
+      .order('created_at', {
+        ascending: false
+      });
+
+
+    if (error) {
+
+      console.error('Load tasks error:', error);
+
+      showToast(
+        'Could not load tasks: ' + error.message
+      );
+
+      return;
+    }
+
+
+    tasks = data || [];
+
+    render();
+
+  } catch (error) {
+
+    console.error('Fetch error:', error);
 
     showToast(
-      'Could not load tasks: ' + error.message
+      'Failed to fetch. Check Supabase URL/key and database settings.'
     );
-
-    return;
   }
-
-  tasks = data || [];
-
-  render();
 }
 
 
 // ==========================================================
-// Add / Edit Task
+// Add / Edit task
 // ==========================================================
 
-taskForm.addEventListener('submit', async (e) => {
+taskForm.addEventListener(
+  'submit',
+  async (e) => {
 
-  e.preventDefault();
-
-  const title =
-    taskTitleInput.value.trim();
-
-  if (!title) return;
-
-  const priority =
-    taskPriorityInput.value;
-
-  const due_date =
-    taskDueInput.value || null;
-
-  const editId =
-    taskEditIdInput.value;
+    e.preventDefault();
 
 
-  // --------------------------------------------------------
-  // EDIT EXISTING TASK
-  // --------------------------------------------------------
+    const title =
+      taskTitleInput.value.trim();
 
-  if (editId) {
 
-    const { error } = await supabase
-      .from('tasks')
-      .update({
-        title,
-        priority,
-        due_date
-      })
-      .eq('id', editId);
-
-    if (error) {
-
-      showToast(
-        'Update failed: ' + error.message
-      );
-
+    if (!title) {
       return;
     }
 
-    showToast('Entry updated');
 
-    exitEditMode();
+    const priority =
+      taskPriorityInput.value;
 
-  }
 
-  // --------------------------------------------------------
-  // ADD NEW TASK
-  // --------------------------------------------------------
+    const due_date =
+      taskDueInput.value || null;
 
-  else {
 
-    const { error } = await supabase
-      .from('tasks')
-      .insert({
-        title,
-        priority,
-        due_date,
-        completed: false
-      });
+    const editId =
+      taskEditIdInput.value;
 
-    if (error) {
 
-      showToast(
-        'Add failed: ' + error.message
-      );
+    // ======================================================
+    // EDIT
+    // ======================================================
 
-      return;
+    if (editId) {
+
+      const { error } = await supabase
+        .from('tasks')
+        .update({
+          title: title,
+          priority: priority,
+          due_date: due_date
+        })
+        .eq('id', editId);
+
+
+      if (error) {
+
+        console.error('Update error:', error);
+
+        showToast(
+          'Update failed: ' + error.message
+        );
+
+        return;
+      }
+
+
+      showToast('Entry updated');
+
+      exitEditMode();
+
     }
 
-    showToast('Entry added');
+
+    // ======================================================
+    // ADD
+    // ======================================================
+
+    else {
+
+      // IMPORTANT:
+      // No user_id here.
+      // Authentication has been removed.
+
+      const { error } = await supabase
+        .from('tasks')
+        .insert({
+          title: title,
+          priority: priority,
+          due_date: due_date,
+          completed: false
+        });
+
+
+      if (error) {
+
+        console.error('Insert error:', error);
+
+        showToast(
+          'Add failed: ' + error.message
+        );
+
+        return;
+      }
+
+
+      showToast('Entry added');
+    }
+
+
+    taskForm.reset();
+
+    taskPriorityInput.value = 'medium';
+
+    taskEditIdInput.value = '';
+
+    taskForm.querySelector(
+      '.btn-primary'
+    ).textContent = 'Add';
+
+
+    await loadTasks();
+
   }
-
-
-  // Reset form
-
-  taskForm.reset();
-
-  taskPriorityInput.value = 'medium';
-
-  await loadTasks();
-
-});
+);
 
 
 // ==========================================================
-// Complete / Uncomplete Task
+// Complete / Uncomplete
 // ==========================================================
 
 async function toggleComplete(task) {
@@ -231,7 +270,10 @@ async function toggleComplete(task) {
     })
     .eq('id', task.id);
 
+
   if (error) {
+
+    console.error('Complete error:', error);
 
     showToast(
       'Could not update: ' + error.message
@@ -240,31 +282,37 @@ async function toggleComplete(task) {
     return;
   }
 
+
   await loadTasks();
 }
 
 
 // ==========================================================
-// Delete Task
+// Delete task
 // ==========================================================
 
 async function deleteTask(task) {
 
-  const confirmed =
-    confirm(
+  if (
+    !confirm(
       'Delete "' +
       task.title +
       '"? This cannot be undone.'
-    );
+    )
+  ) {
+    return;
+  }
 
-  if (!confirmed) return;
 
   const { error } = await supabase
     .from('tasks')
     .delete()
     .eq('id', task.id);
 
+
   if (error) {
+
+    console.error('Delete error:', error);
 
     showToast(
       'Delete failed: ' + error.message
@@ -273,6 +321,7 @@ async function deleteTask(task) {
     return;
   }
 
+
   showToast('Entry deleted');
 
   await loadTasks();
@@ -280,7 +329,7 @@ async function deleteTask(task) {
 
 
 // ==========================================================
-// Edit Mode
+// Edit mode
 // ==========================================================
 
 function enterEditMode(task) {
@@ -297,11 +346,11 @@ function enterEditMode(task) {
   taskEditIdInput.value =
     task.id;
 
-  taskTitleInput.focus();
+  taskForm.querySelector(
+    '.btn-primary'
+  ).textContent = 'Save';
 
-  taskForm
-    .querySelector('.btn-primary')
-    .textContent = 'Save';
+  taskTitleInput.focus();
 
   render();
 }
@@ -311,35 +360,44 @@ function exitEditMode() {
 
   taskEditIdInput.value = '';
 
-  taskForm
-    .querySelector('.btn-primary')
-    .textContent = 'Add';
+  taskForm.querySelector(
+    '.btn-primary'
+  ).textContent = 'Add';
 }
 
 
 // ==========================================================
-// Status Filters
+// Status filters
 // ==========================================================
 
 document
   .querySelectorAll('[data-filter-status]')
   .forEach(btn => {
 
-    btn.addEventListener('click', () => {
+    btn.addEventListener(
+      'click',
+      () => {
 
-      statusFilter =
-        btn.dataset.filterStatus;
+        statusFilter =
+          btn.dataset.filterStatus;
 
-      document
-        .querySelectorAll('[data-filter-status]')
-        .forEach(b => {
-          b.classList.remove('active');
-        });
 
-      btn.classList.add('active');
+        document
+          .querySelectorAll(
+            '[data-filter-status]'
+          )
+          .forEach(b => {
 
-      render();
-    });
+            b.classList.remove('active');
+
+          });
+
+
+        btn.classList.add('active');
+
+        render();
+      }
+    );
 
   });
 
@@ -348,20 +406,23 @@ document
 // Search
 // ==========================================================
 
-searchInput.addEventListener('input', () => {
+searchInput.addEventListener(
+  'input',
+  () => {
 
-  searchQuery =
-    searchInput.value
-      .trim()
-      .toLowerCase();
+    searchQuery =
+      searchInput.value
+        .trim()
+        .toLowerCase();
 
-  render();
+    render();
 
-});
+  }
+);
 
 
 // ==========================================================
-// Priority Filters
+// Priority filters
 // ==========================================================
 
 function buildPriorityFilters() {
@@ -399,6 +460,7 @@ function buildPriorityFilters() {
     const btn =
       document.createElement('button');
 
+
     btn.className =
       'filter-item' +
       (
@@ -429,32 +491,32 @@ function buildPriorityFilters() {
     btn.appendChild(label);
 
 
-    btn.addEventListener('click', () => {
+    btn.addEventListener(
+      'click',
+      () => {
 
-      priorityFilter =
-        level.key;
+        priorityFilter =
+          level.key;
 
-      render();
+        render();
 
-    });
+      }
+    );
 
 
     priorityFilterList.appendChild(btn);
 
   });
-
 }
 
 
 // ==========================================================
-// Filtering
+// Filter tasks
 // ==========================================================
 
 function getFilteredTasks() {
 
   return tasks.filter(task => {
-
-    // Status filter
 
     if (
       statusFilter === 'active' &&
@@ -472,8 +534,6 @@ function getFilteredTasks() {
     }
 
 
-    // Priority filter
-
     if (
       priorityFilter !== 'all' &&
       task.priority !== priorityFilter
@@ -481,8 +541,6 @@ function getFilteredTasks() {
       return false;
     }
 
-
-    // Search filter
 
     if (
       searchQuery &&
@@ -497,22 +555,25 @@ function getFilteredTasks() {
     return true;
 
   });
-
 }
 
 
 // ==========================================================
-// Date Formatting
+// Date formatting
 // ==========================================================
 
 function formatDue(dateStr) {
 
-  if (!dateStr) return null;
+  if (!dateStr) {
+    return null;
+  }
+
 
   const d =
     new Date(
       dateStr + 'T00:00:00'
     );
+
 
   return d.toLocaleDateString(
     undefined,
@@ -521,12 +582,11 @@ function formatDue(dateStr) {
       day: 'numeric'
     }
   );
-
 }
 
 
 // ==========================================================
-// Overdue Check
+// Overdue
 // ==========================================================
 
 function isOverdue(task) {
@@ -538,6 +598,7 @@ function isOverdue(task) {
     return false;
   }
 
+
   const today =
     new Date();
 
@@ -548,18 +609,17 @@ function isOverdue(task) {
     0
   );
 
+
   return (
     new Date(
-      task.due_date +
-      'T00:00:00'
+      task.due_date + 'T00:00:00'
     ) < today
   );
-
 }
 
 
 // ==========================================================
-// Rendering
+// Render
 // ==========================================================
 
 function render() {
@@ -567,17 +627,17 @@ function render() {
   buildPriorityFilters();
 
 
-  // --------------------------------------------------------
-  // Counters
-  // --------------------------------------------------------
+  // Counts
 
   countAll.textContent =
     tasks.length;
+
 
   countActive.textContent =
     tasks.filter(
       task => !task.completed
     ).length;
+
 
   countCompleted.textContent =
     tasks.filter(
@@ -585,13 +645,11 @@ function render() {
     ).length;
 
 
-  // --------------------------------------------------------
-  // Filtered tasks
-  // --------------------------------------------------------
-
   const filtered =
     getFilteredTasks();
 
+
+  // Title
 
   const titles = {
 
@@ -607,6 +665,7 @@ function render() {
   listTitle.textContent =
     titles[statusFilter];
 
+
   listSub.textContent =
     filtered.length +
     (
@@ -616,9 +675,7 @@ function render() {
     );
 
 
-  // --------------------------------------------------------
-  // Clear current list
-  // --------------------------------------------------------
+  // Clear list
 
   taskListEl.innerHTML = '';
 
@@ -629,14 +686,13 @@ function render() {
   );
 
 
-  // --------------------------------------------------------
-  // Render tasks
-  // --------------------------------------------------------
+  // Create rows
 
   filtered.forEach(task => {
 
     const li =
       document.createElement('li');
+
 
     li.className =
       'task-row' +
@@ -651,24 +707,28 @@ function render() {
           : ''
       );
 
+
     li.dataset.priority =
       task.priority;
 
 
-    // ------------------------------------------------------
+    // ======================================================
     // Complete button
-    // ------------------------------------------------------
+    // ======================================================
 
     const stamp =
       document.createElement('button');
 
+
     stamp.className =
       'stamp';
+
 
     stamp.setAttribute(
       'aria-label',
       'Toggle complete'
     );
+
 
     stamp.innerHTML = `
       <svg
@@ -683,29 +743,28 @@ function render() {
       </svg>
     `;
 
+
     stamp.addEventListener(
       'click',
       () => toggleComplete(task)
     );
 
 
-    // ------------------------------------------------------
-    // Task body
-    // ------------------------------------------------------
+    // ======================================================
+    // Body
+    // ======================================================
 
     const body =
       document.createElement('div');
+
 
     body.className =
       'task-body';
 
 
-    // ------------------------------------------------------
-    // Title
-    // ------------------------------------------------------
-
     const titleLine =
       document.createElement('div');
+
 
     titleLine.className =
       'task-title-line';
@@ -714,8 +773,10 @@ function render() {
     const titleText =
       document.createElement('span');
 
+
     titleText.className =
       'task-title-text';
+
 
     titleText.textContent =
       task.title;
@@ -724,9 +785,11 @@ function render() {
     const tag =
       document.createElement('span');
 
+
     tag.className =
       'priority-tag ' +
       task.priority;
+
 
     tag.textContent =
       task.priority;
@@ -736,17 +799,15 @@ function render() {
       titleText
     );
 
+
     titleLine.appendChild(
       tag
     );
 
 
-    // ------------------------------------------------------
-    // Due date
-    // ------------------------------------------------------
-
     const meta =
       document.createElement('div');
+
 
     meta.className =
       'task-meta' +
@@ -766,10 +827,10 @@ function render() {
     meta.textContent =
       dueLabel
         ? (
-          isOverdue(task)
-            ? 'Overdue · ' + dueLabel
-            : 'Due ' + dueLabel
-        )
+            isOverdue(task)
+              ? 'Overdue · ' + dueLabel
+              : 'Due ' + dueLabel
+          )
         : 'No due date';
 
 
@@ -777,31 +838,35 @@ function render() {
       titleLine
     );
 
+
     body.appendChild(
       meta
     );
 
 
-    // ------------------------------------------------------
+    // ======================================================
     // Actions
-    // ------------------------------------------------------
+    // ======================================================
 
     const actions =
       document.createElement('div');
+
 
     actions.className =
       'task-actions';
 
 
-    // Edit button
+    // Edit
 
     const editBtn =
       document.createElement('button');
+
 
     editBtn.setAttribute(
       'aria-label',
       'Edit'
     );
+
 
     editBtn.innerHTML = `
       <svg
@@ -815,21 +880,24 @@ function render() {
       </svg>
     `;
 
+
     editBtn.addEventListener(
       'click',
       () => enterEditMode(task)
     );
 
 
-    // Delete button
+    // Delete
 
     const delBtn =
       document.createElement('button');
+
 
     delBtn.setAttribute(
       'aria-label',
       'Delete'
     );
+
 
     delBtn.innerHTML = `
       <svg
@@ -844,6 +912,7 @@ function render() {
       </svg>
     `;
 
+
     delBtn.addEventListener(
       'click',
       () => deleteTask(task)
@@ -854,26 +923,30 @@ function render() {
       editBtn
     );
 
+
     actions.appendChild(
       delBtn
     );
 
 
-    // ------------------------------------------------------
-    // Final task row
-    // ------------------------------------------------------
+    // ======================================================
+    // Assemble
+    // ======================================================
 
     li.appendChild(
       stamp
     );
 
+
     li.appendChild(
       body
     );
 
+
     li.appendChild(
       actions
     );
+
 
     taskListEl.appendChild(
       li
@@ -885,7 +958,7 @@ function render() {
 
 
 // ==========================================================
-// Dark Mode
+// Dark mode
 // ==========================================================
 
 function applyTheme(theme) {
@@ -902,6 +975,7 @@ function applyTheme(theme) {
     theme === 'dark'
   );
 
+
   moonIcon.classList.toggle(
     'hidden',
     theme !== 'dark'
@@ -912,7 +986,6 @@ function applyTheme(theme) {
     'ledger-theme',
     theme
   );
-
 }
 
 
@@ -922,9 +995,8 @@ themeToggle.addEventListener(
 
     const current =
       document.documentElement
-        .getAttribute(
-          'data-theme'
-        ) || 'light';
+        .getAttribute('data-theme') ||
+      'light';
 
 
     applyTheme(
@@ -937,9 +1009,7 @@ themeToggle.addEventListener(
 );
 
 
-// ==========================================================
-// Initial Theme
-// ==========================================================
+// Initial theme
 
 (function initTheme() {
 
@@ -979,6 +1049,7 @@ function showToast(message) {
   toastEl.textContent =
     message;
 
+
   toastEl.classList.remove(
     'hidden'
   );
@@ -998,12 +1069,11 @@ function showToast(message) {
       },
       2600
     );
-
 }
 
 
 // ==========================================================
-// START APP
+// Start application
 // ==========================================================
 
-init();
+loadTasks();
