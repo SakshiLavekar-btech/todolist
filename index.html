@@ -1,129 +1,433 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-<title>Ledger — Task List</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,500&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css" />
+  <meta charset="UTF-8" />
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+  />
+
+  <title>Ledger — Task List</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,500&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap"
+    rel="stylesheet"
+  >
+
+  <link rel="stylesheet" href="styles.css" />
 </head>
+
 <body>
 
-  <!-- ============ AUTH SCREEN ============ -->
-  <div id="auth-screen" class="auth-screen">
-    <div class="auth-card">
-      <div class="brand">
-        <span class="brand-mark">§</span>
-        <h1>Ledger</h1>
-      </div>
-      <p class="auth-tagline">A quiet place to keep your tasks in order.</p>
+  <!-- =====================================================
+       APP SHELL
+       No Login
+       No Signup
+       No Authentication
+       No Logout
+       ===================================================== -->
 
-      <div class="auth-tabs">
-        <button class="auth-tab active" data-tab="login">Log in</button>
-        <button class="auth-tab" data-tab="signup">Sign up</button>
-      </div>
+  <div id="app-shell" class="app-shell">
 
-      <form id="login-form" class="auth-form">
-        <label>Email
-          <input type="email" id="login-email" required autocomplete="email" />
-        </label>
-        <label>Password
-          <input type="password" id="login-password" required autocomplete="current-password" />
-        </label>
-        <button type="submit" class="btn-primary">Log in</button>
-        <p class="auth-error" id="login-error"></p>
-      </form>
+    <!-- ===================================================
+         TOP BAR
+         =================================================== -->
 
-      <form id="signup-form" class="auth-form hidden">
-        <label>Email
-          <input type="email" id="signup-email" required autocomplete="email" />
-        </label>
-        <label>Password
-          <input type="password" id="signup-password" required minlength="6" autocomplete="new-password" />
-        </label>
-        <button type="submit" class="btn-primary">Create account</button>
-        <p class="auth-error" id="signup-error"></p>
-        <p class="auth-note" id="signup-note"></p>
-      </form>
-
-      <p class="auth-footnote">Set your Supabase project keys in <code>app.js</code> before signing in. See README for setup.</p>
-    </div>
-  </div>
-
-  <!-- ============ APP SHELL ============ -->
-  <div id="app-shell" class="app-shell hidden">
     <header class="topbar">
+
       <div class="topbar-left">
-        <span class="brand-mark small">§</span>
-        <span class="topbar-title">Ledger</span>
+
+        <span class="brand-mark small">
+          §
+        </span>
+
+        <span class="topbar-title">
+          Ledger
+        </span>
+
       </div>
+
+
       <div class="topbar-right">
-        <button id="theme-toggle" class="icon-btn" title="Toggle dark mode" aria-label="Toggle dark mode">
-          <svg id="theme-icon-sun" class="theme-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.4M12 19.1v2.4M4.2 4.2l1.7 1.7M18.1 18.1l1.7 1.7M2.5 12h2.4M19.1 12h2.4M4.2 19.8l1.7-1.7M18.1 5.9l1.7-1.7"/></svg>
-          <svg id="theme-icon-moon" class="theme-icon hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M20.5 14.5A8.5 8.5 0 1 1 9.5 3.5a7 7 0 0 0 11 11Z"/></svg>
+
+        <!-- Dark Mode Toggle -->
+
+        <button
+          id="theme-toggle"
+          class="icon-btn"
+          title="Toggle dark mode"
+          aria-label="Toggle dark mode"
+        >
+
+          <!-- Sun -->
+
+          <svg
+            id="theme-icon-sun"
+            class="theme-icon"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.6"
+          >
+            <circle
+              cx="12"
+              cy="12"
+              r="4.2"
+            />
+
+            <path d="M12 2.5v2.4" />
+            <path d="M12 19.1v2.4" />
+
+            <path d="M4.2 4.2l1.7 1.7" />
+            <path d="M18.1 18.1l1.7 1.7" />
+
+            <path d="M2.5 12h2.4" />
+            <path d="M19.1 12h2.4" />
+
+            <path d="M4.2 19.8l1.7-1.7" />
+            <path d="M18.1 5.9l1.7-1.7" />
+          </svg>
+
+
+          <!-- Moon -->
+
+          <svg
+            id="theme-icon-moon"
+            class="theme-icon hidden"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.6"
+          >
+            <path
+              d="M20.5 14.5A8.5 8.5 0 1 1 9.5 3.5a7 7 0 0 0 11 11Z"
+            />
+          </svg>
+
         </button>
-        <span class="user-email" id="user-email"></span>
-        <button id="logout-btn" class="btn-ghost">Log out</button>
+
       </div>
+
     </header>
 
+
+    <!-- ===================================================
+         MAIN LAYOUT
+         =================================================== -->
+
     <div class="layout">
-      <!-- Sidebar: filters -->
+
+
+      <!-- =================================================
+           SIDEBAR
+           ================================================= -->
+
       <aside class="sidebar">
+
+
+        <!-- ================= STATUS ================= -->
+
         <div class="sidebar-section">
-          <h2 class="sidebar-heading">Status</h2>
-          <button class="filter-item active" data-filter-status="all">All tasks <span class="count" id="count-all">0</span></button>
-          <button class="filter-item" data-filter-status="active">Active <span class="count" id="count-active">0</span></button>
-          <button class="filter-item" data-filter-status="completed">Completed <span class="count" id="count-completed">0</span></button>
+
+          <h2 class="sidebar-heading">
+            Status
+          </h2>
+
+
+          <!-- All -->
+
+          <button
+            class="filter-item active"
+            data-filter-status="all"
+          >
+
+            <span>
+              All tasks
+            </span>
+
+            <span
+              class="count"
+              id="count-all"
+            >
+              0
+            </span>
+
+          </button>
+
+
+          <!-- Active -->
+
+          <button
+            class="filter-item"
+            data-filter-status="active"
+          >
+
+            <span>
+              Active
+            </span>
+
+            <span
+              class="count"
+              id="count-active"
+            >
+              0
+            </span>
+
+          </button>
+
+
+          <!-- Completed -->
+
+          <button
+            class="filter-item"
+            data-filter-status="completed"
+          >
+
+            <span>
+              Completed
+            </span>
+
+            <span
+              class="count"
+              id="count-completed"
+            >
+              0
+            </span>
+
+          </button>
+
         </div>
+
+
+        <!-- ================= PRIORITY ================= -->
+
         <div class="sidebar-section">
-          <h2 class="sidebar-heading">Priority</h2>
-          <div id="priority-filter-list"><!-- populated dynamically --></div>
+
+          <h2 class="sidebar-heading">
+            Priority
+          </h2>
+
+          <div id="priority-filter-list">
+            <!-- Priority filters populated by app.js -->
+          </div>
+
         </div>
+
       </aside>
 
-      <!-- Main -->
+
+      <!-- =================================================
+           MAIN CONTENT
+           ================================================= -->
+
       <main class="main">
+
+
+        <!-- ================= HEADER ================= -->
+
         <div class="main-header">
+
+
+          <!-- Page title -->
+
           <div>
-            <h1 class="page-title" id="list-title">All tasks</h1>
-            <p class="page-sub" id="list-sub">0 entries</p>
+
+            <h1
+              class="page-title"
+              id="list-title"
+            >
+              All tasks
+            </h1>
+
+
+            <p
+              class="page-sub"
+              id="list-sub"
+            >
+              0 entries
+            </p>
+
           </div>
+
+
+          <!-- ================= SEARCH ================= -->
+
           <div class="search-wrap">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" class="search-icon"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.2-3.2"/></svg>
-            <input type="text" id="search-input" placeholder="Search tasks…" />
+
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+              class="search-icon"
+            >
+
+              <circle
+                cx="11"
+                cy="11"
+                r="7"
+              />
+
+              <path
+                d="m20 20-3.2-3.2"
+              />
+
+            </svg>
+
+
+            <input
+              type="text"
+              id="search-input"
+              placeholder="Search tasks…"
+              autocomplete="off"
+            />
+
           </div>
+
         </div>
 
-        <!-- New task composer -->
-        <form id="task-form" class="task-composer">
-          <input type="text" id="task-title" placeholder="Add a new entry…" required maxlength="200" />
+
+        <!-- =================================================
+             NEW TASK COMPOSER
+             ================================================= -->
+
+        <form
+          id="task-form"
+          class="task-composer"
+        >
+
+
+          <!-- Task title -->
+
+          <input
+            type="text"
+            id="task-title"
+            placeholder="Add a new entry…"
+            required
+            maxlength="200"
+            autocomplete="off"
+          />
+
+
+          <!-- Composer controls -->
+
           <div class="composer-row">
-            <select id="task-priority">
-              <option value="medium">Medium priority</option>
-              <option value="high">High priority</option>
-              <option value="low">Low priority</option>
+
+
+            <!-- Priority -->
+
+            <select
+              id="task-priority"
+            >
+
+              <option value="medium">
+                Medium priority
+              </option>
+
+              <option value="high">
+                High priority
+              </option>
+
+              <option value="low">
+                Low priority
+              </option>
+
             </select>
-            <input type="date" id="task-due" />
-            <button type="submit" class="btn-primary">Add</button>
+
+
+            <!-- Due date -->
+
+            <input
+              type="date"
+              id="task-due"
+            />
+
+
+            <!-- Add / Save -->
+
+            <button
+              type="submit"
+              class="btn-primary"
+            >
+              Add
+            </button>
+
           </div>
-          <input type="hidden" id="task-edit-id" value="" />
+
+
+          <!-- Hidden field used during editing -->
+
+          <input
+            type="hidden"
+            id="task-edit-id"
+            value=""
+          />
+
         </form>
 
-        <ul class="task-list" id="task-list"></ul>
 
-        <div class="empty-state hidden" id="empty-state">
-          <p class="empty-title">Nothing here.</p>
-          <p class="empty-sub">Add your first entry above, or clear your filters.</p>
+        <!-- =================================================
+             TASK LIST
+             ================================================= -->
+
+        <ul
+          class="task-list"
+          id="task-list"
+        >
+        </ul>
+
+
+        <!-- =================================================
+             EMPTY STATE
+             ================================================= -->
+
+        <div
+          class="empty-state hidden"
+          id="empty-state"
+        >
+
+          <p class="empty-title">
+            Nothing here.
+          </p>
+
+          <p class="empty-sub">
+            Add your first entry above, or clear your filters.
+          </p>
+
         </div>
+
       </main>
+
     </div>
+
   </div>
 
-  <div id="toast" class="toast hidden"></div>
 
-  <script type="module" src="app.js"></script>
+  <!-- =====================================================
+       TOAST MESSAGE
+       ===================================================== -->
+
+  <div
+    id="toast"
+    class="toast hidden"
+  >
+  </div>
+
+
+  <!-- =====================================================
+       APP JAVASCRIPT
+       ===================================================== -->
+
+  <script
+    type="module"
+    src="app.js"
+  ></script>
+
 </body>
+
 </html>
